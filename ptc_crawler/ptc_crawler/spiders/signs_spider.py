@@ -5,21 +5,21 @@ import scrapy
 from scrapy.selector import Selector
 from scrapy.loader import ItemLoader
 from ptc_crawler.items import Sign
-from constants.ptc_constants import signs
+from constants.ptc_constants import domain
+from constants.ptc_constants import base_item
 
 class SignsSpider(scrapy.Spider):
 	name= "signs"	
-	signs_link='http://www.passetoncode.fr/panneaux-de-signalisation/panneaux/'
 	
 	custom_settings={
-        'SIGNS': []
+        'SIGNS': [],
+		'ITEMS_SIGNS': []
     }
 
-	#def __init__(self):
-	#	self.signs = signs		
+	def __init__(self):
+		self.signs_link=domain+base_item		
 
 	def start_requests(self):
-		# signs_links=[self.signs_link+sign for sign in self.signs]
 		signs_links=[self.signs_link+sign for sign in self.custom_settings['SIGNS']]
 		for signs_link in signs_links:
 			yield scrapy.Request(url=signs_link, callback=self.parse)
@@ -27,6 +27,7 @@ class SignsSpider(scrapy.Spider):
 	def parse(self, response):
 		link_loader=ItemLoader(response=response)
 		links=link_loader.get_css('div.main > section.section > div.container > div > div > div > a')
+		
 		for link in links:
 			link_selector=Selector(text=link, type="xml")
 			link_loader=ItemLoader(item=Sign(), selector=link_selector)
@@ -36,4 +37,15 @@ class SignsSpider(scrapy.Spider):
 			link_loader.add_xpath('miniature_url', 'img/@src')			
 			
 			sign=link_loader.load_item()
-			self.log(sign)
+			yield scrapy.Request(url=sign['detail_url'], callback=self.parse_image_url, meta={'current_item': sign})
+
+
+	def parse_image_url(self, response):
+		image_loader=ItemLoader(response=response)
+		link=image_loader.get_css('div.main > section.section > div.container > div > div > div > img')[0]
+		link_selector=Selector(text=link, type="xml")
+		image_url=link_selector.xpath('@src').extract_first()
+		sign=response.meta['current_item'] 
+		sign['image_url']=image_url
+		self.custom_settings['ITEMS_SIGNS'].append(sign)
+		
