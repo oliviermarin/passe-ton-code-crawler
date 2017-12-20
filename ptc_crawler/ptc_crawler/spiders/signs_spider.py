@@ -5,25 +5,35 @@ import scrapy
 from scrapy.selector import Selector
 from scrapy.loader import ItemLoader
 from ptc_crawler.items import Sign
+from constants.ptc_constants import signs
 
 class SignsSpider(scrapy.Spider):
-	name= "signs"
+	name= "signs"	
+	signs_link='http://www.passetoncode.fr/panneaux-de-signalisation/panneaux/'
+	
+	custom_settings={
+        'SIGNS': []
+    }
+
+	#def __init__(self):
+	#	self.signs = signs		
 
 	def start_requests(self):
-		urls=['http://www.passetoncode.fr/panneaux-de-signalisation/panneaux/agglomeration/']
-		for url in urls:
-			yield scrapy.Request(url=url, callback=self.parse)
+		# signs_links=[self.signs_link+sign for sign in self.signs]
+		signs_links=[self.signs_link+sign for sign in self.custom_settings['SIGNS']]
+		for signs_link in signs_links:
+			yield scrapy.Request(url=signs_link, callback=self.parse)
 
 	def parse(self, response):
-		linkLoader=ItemLoader(response=response)
-		links=linkLoader.get_css('div.main > section.section > div.container > div > div > div > a')
+		link_loader=ItemLoader(response=response)
+		links=link_loader.get_css('div.main > section.section > div.container > div > div > div > a')
 		for link in links:
-			linkSelector=Selector(text=link, type="xml")
-			linkLoader=ItemLoader(item=Sign(), selector=linkSelector)
+			link_selector=Selector(text=link, type="xml")
+			link_loader=ItemLoader(item=Sign(), selector=link_selector)
 			
-			linkLoader.add_xpath('detail_url', '@href')
-			linkLoader.add_xpath('meaning', '@title')
-			linkLoader.add_xpath('miniature_url', 'img/@src')			
+			link_loader.add_xpath('detail_url', '@href')
+			link_loader.add_xpath('meaning', '@title')
+			link_loader.add_xpath('miniature_url', 'img/@src')			
 			
-			sign=linkLoader.load_item()
+			sign=link_loader.load_item()
 			self.log(sign)
