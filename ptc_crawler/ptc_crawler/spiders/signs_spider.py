@@ -39,13 +39,16 @@ class SignsSpider(scrapy.Spider):
 			sign=link_loader.load_item()
 			yield scrapy.Request(url=sign['detail_url'], callback=self.parse_image_url, meta={'current_item': sign})
 
-
 	def parse_image_url(self, response):
 		image_loader=ItemLoader(response=response)
 		link=image_loader.get_css('div.main > section.section > div.container > div > div > div > img')[0]
+		
 		link_selector=Selector(text=link, type="xml")
-		image_url=link_selector.xpath('@src').extract_first()
-		sign=response.meta['current_item'] 
-		sign['image_url']=image_url
+		sign=response.meta['current_item']
+		link_loader=ItemLoader(item=sign, selector=link_selector)
+
+		link_loader.add_xpath('image_url', '@src')
+		
+		sign=link_loader.load_item()
 		self.custom_settings['ITEMS_SIGNS'].append(sign)
 		
