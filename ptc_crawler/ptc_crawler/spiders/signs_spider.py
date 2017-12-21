@@ -5,19 +5,19 @@ import scrapy
 from scrapy.selector import Selector
 from scrapy.loader import ItemLoader
 from ptc_crawler.items import Sign
-from constants.ptc_constants import domain
-from constants.ptc_constants import base_item
+from ptc_crawler.constants.ptc_constants import signs
+from ptc_crawler.constants.ptc_constants import domain
+from ptc_crawler.constants.ptc_constants import base_item
 
 class SignsSpider(scrapy.Spider):
 	name= "signs"	
 	
 	custom_settings={
-        'SIGNS': [],
-		'ITEMS_SIGNS': []
+        'SIGNS': signs,
     }
 
 	def __init__(self):
-		self.signs_link=domain+base_item		
+		self.signs_link=domain+base_item
 
 	def start_requests(self):
 		signs_links=[self.signs_link+sign for sign in self.custom_settings['SIGNS']]
@@ -50,5 +50,5 @@ class SignsSpider(scrapy.Spider):
 		link_loader.add_xpath('image_url', '@src')
 		
 		sign=link_loader.load_item()
-		self.custom_settings['ITEMS_SIGNS'].append(sign)
+		return sign
 		
