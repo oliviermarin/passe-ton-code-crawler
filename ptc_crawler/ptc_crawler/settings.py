@@ -67,6 +67,9 @@ ITEM_PIPELINES = {
     'ptc_crawler.pipelines.SignPipeline': 100
 }
 
+MONGODB_SERVER = "localhost"
+MONGODB_PORT = 27017
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True

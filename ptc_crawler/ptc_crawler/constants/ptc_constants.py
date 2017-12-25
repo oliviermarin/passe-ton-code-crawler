@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
-domain = 'http://www.passetoncode.fr'
+domain='http://www.passetoncode.fr'
 
-base_item = '/panneaux-de-signalisation/panneaux/'
+base_item='/panneaux-de-signalisation/'
 
-signs = [
+base_sign=base_item+'panneaux/'
+
+signs=[
 		'agglomeration',
 		'danger',
 		'direction',
@@ -14,12 +16,14 @@ signs = [
 		'obligation',
 		'priorites',
 		'travaux',
-		'zones',
-		'cartouches',
-		'ideogrammes',
-		'panonceaux',
-		'symboles',
-		'balises'	
+		'zone'
 	]
 
+others=[
+	'cartouches',
+	'ideogrammes',
+	'panonceaux',
+	'symboles',
+	'balises'	
+] 
 

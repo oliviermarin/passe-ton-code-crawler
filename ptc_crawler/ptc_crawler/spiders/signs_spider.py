@@ -5,26 +5,34 @@ import scrapy
 from scrapy.selector import Selector
 from scrapy.loader import ItemLoader
 from ptc_crawler.items import Sign
+
 from ptc_crawler.constants.ptc_constants import signs
+from ptc_crawler.constants.ptc_constants import others
+
 from ptc_crawler.constants.ptc_constants import domain
 from ptc_crawler.constants.ptc_constants import base_item
+from ptc_crawler.constants.ptc_constants import base_sign
 
 class SignsSpider(scrapy.Spider):
 	name= "signs"	
-	
-	custom_settings={
-        'SIGNS': signs,
-    }
 
 	def __init__(self):
-		self.signs_link=domain+base_item
+		self.others_link=domain+base_item
+		self.signs_link=domain+base_sign
 
 	def start_requests(self):
-		signs_links=[self.signs_link+sign for sign in self.custom_settings['SIGNS']]
-		for signs_link in signs_links:
-			yield scrapy.Request(url=signs_link, callback=self.parse)
+		signs_links=[self.signs_link+sign for sign in signs]
+		others_links=[self.others_link+sign for sign in others]
+		
+		categories=signs+others
+		links=signs_links+others_links
+
+		for index, signs_link in enumerate(links):
+			yield scrapy.Request(url=signs_link, callback=self.parse, meta={'current_category': categories[index]})
 
 	def parse(self, response):
+		category=response.meta['current_category']
+
 		link_loader=ItemLoader(response=response)
 		links=link_loader.get_css('div.main > section.section > div.container > div > div > div > a')
 		
@@ -32,6 +40,7 @@ class SignsSpider(scrapy.Spider):
 			link_selector=Selector(text=link, type="xml")
 			link_loader=ItemLoader(item=Sign(), selector=link_selector)
 			
+			link_loader.add_value('category', category)
 			link_loader.add_xpath('detail_url', '@href')
 			link_loader.add_xpath('meaning', '@title')
 			link_loader.add_xpath('miniature_url', 'img/@src')			
