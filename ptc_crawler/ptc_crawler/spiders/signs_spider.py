@@ -51,7 +51,7 @@ class SignsSpider(scrapy.Spider):
 	def parse_image_url(self, response):
 		image_loader=ItemLoader(response=response)
 		link=image_loader.get_css('div.main > section.section > div.container > div > div > div > img')[0]
-		
+
 		link_selector=Selector(text=link, type="xml")
 		sign=response.meta['current_item']
 		link_loader=ItemLoader(item=sign, selector=link_selector)
